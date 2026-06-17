@@ -82,6 +82,14 @@
       </section>
     </main>
 
-    <script type="module" src="./app.js?v=20260617-fix4"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "onnxruntime-web/webgpu": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/ort.webgpu.min.mjs",
+          "onnxruntime-common": "https://cdn.jsdelivr.net/npm/onnxruntime-common@1.24.0-dev.20251116-b39e144322/dist/esm/index.js"
+        }
+      }
+    </script>
+    <script type="module" src="./app.js?v=20260617-fix5"></script>
   </body>
 </html>
