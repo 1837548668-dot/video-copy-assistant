@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>在线提取文案｜授权视频文案助手</title>
+    <meta name="description" content="授权视频文案助手网页版上传入口。" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./">授权视频文案助手</a>
+      <nav>
+        <a href="./">官网</a>
+        <a href="#upload">上传</a>
+        <a href="#notice">说明</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="webapp-shell" id="upload">
+        <div class="section-head">
+          <p class="eyebrow">网页版 / PWA</p>
+          <h1>上传视频，提取文案</h1>
+          <p class="lead">这个页面是手机、平板、电脑通用入口。上线时需要连接 HTTPS 后端。</p>
+        </div>
+
+        <section class="panel webapp-panel">
+          <label class="field">
+            <span>后端地址</span>
+            <input id="apiBase" type="url" placeholder="https://你的后端域名" />
+          </label>
+
+          <label class="field">
+            <span>来源备注</span>
+            <textarea id="sourceUrl" placeholder="视频来源、客户名称或备注"></textarea>
+          </label>
+
+          <label class="check-row">
+            <input id="ownershipConfirmed" type="checkbox" />
+            <span>我确认该视频为自有或已授权内容</span>
+          </label>
+
+          <label class="file-picker">
+            <span>视频文件</span>
+            <input id="videoFile" type="file" accept="video/*,audio/*" />
+          </label>
+
+          <button id="processBtn" class="primary-button button-reset" type="button">开始提取</button>
+
+          <div class="result-box">
+            <div class="section-head compact-head">
+              <h2>文案结果</h2>
+              <button id="copyBtn" class="secondary-button button-reset" type="button">复制</button>
+            </div>
+            <textarea id="transcript" readonly></textarea>
+          </div>
+        </section>
+
+        <section class="content-band split inline-band" id="notice">
+          <div>
+            <p class="eyebrow">上线条件</p>
+            <h2>需要一个云端后端</h2>
+          </div>
+          <p>手机和网页不能直接运行本地 FFmpeg 服务。要让客户长期使用，需要部署 HTTPS 后端，并配置转写密钥、上传限制、存储清理和用户授权记录。</p>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
