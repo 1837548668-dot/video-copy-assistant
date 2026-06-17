@@ -19,6 +19,12 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+textarea {
+  font: inherit;
+}
+
 .site-header {
   align-items: center;
   background: rgba(255, 255, 255, 0.92);
@@ -164,6 +170,103 @@ h3 {
   border: 1px solid #d9e0ea;
   border-radius: 8px;
   padding: 22px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.06);
+  padding: 22px;
+}
+
+.webapp-shell {
+  margin: 0 auto;
+  max-width: 900px;
+  min-height: calc(100vh - 74px);
+  padding: 54px 32px 72px;
+}
+
+.webapp-shell h1 {
+  font-size: 42px;
+}
+
+.webapp-panel {
+  margin-top: 24px;
+}
+
+.field,
+.file-picker {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.field span,
+.file-picker span {
+  color: #344054;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.field input,
+.field textarea,
+.file-picker input,
+.result-box textarea {
+  background: #f8fafc;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  color: #101828;
+  outline: none;
+  padding: 12px;
+  width: 100%;
+}
+
+.field textarea {
+  height: 96px;
+  resize: vertical;
+}
+
+.check-row {
+  align-items: center;
+  color: #344054;
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 18px;
+}
+
+.button-reset {
+  border: 0;
+  cursor: pointer;
+}
+
+.button-reset:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.result-box {
+  margin-top: 22px;
+}
+
+.compact-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.result-box textarea {
+  height: 260px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.inline-band {
+  margin-top: 32px;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .steps span {
