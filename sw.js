@@ -1,10 +1,10 @@
-const CACHE_NAME = 'video-copy-static-v5';
+const CACHE_NAME = 'video-copy-static-v6';
 const SHARE_CACHE = 'video-copy-share';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './app.html',
-  './app.js?v=20260617-fix5',
+  './app.js?v=20260617-fix6',
   './styles.css',
   './manifest.webmanifest',
   './assets/product-preview.svg',
