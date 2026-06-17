@@ -1,10 +1,10 @@
-const CACHE_NAME = 'video-copy-static-v1';
+const CACHE_NAME = 'video-copy-static-v2';
 const SHARE_CACHE = 'video-copy-share';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './app.html',
-  './app.js',
+  './app.js?v=20260617-fix1',
   './styles.css',
   './manifest.webmanifest',
   './assets/product-preview.svg',
@@ -20,7 +20,15 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith('video-copy-static-') && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', (event) => {
