@@ -1,0 +1,34 @@
+{
+  "name": "授权视频文案助手",
+  "short_name": "视频文案",
+  "description": "手机、平板、电脑都能用的视频文案本地提取工具。",
+  "start_url": "./app.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#101828",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "./app.html?share-target=1",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "video",
+          "accept": ["video/*", "audio/*"]
+        }
+      ]
+    }
+  }
+}
