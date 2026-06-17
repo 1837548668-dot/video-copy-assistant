@@ -19,6 +19,8 @@ const state = {
   dependencyPromise: null
 };
 
+const APP_VERSION = '20260617-fix2';
+
 window.addEventListener('error', (event) => {
   reportError(event.error || event.message || '页面脚本加载失败。');
 });
@@ -193,10 +195,11 @@ async function getTranscriber(modelName) {
 
 async function loadDependencies() {
   if (!state.dependencyPromise) {
+    setStatus('正在加载浏览器识别引擎...', 32);
     state.dependencyPromise = Promise.all([
       import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm'),
       import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm'),
-      import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/+esm')
+      import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2')
     ]).then(([ffmpegModule, utilModule, transformersModule]) => {
       const deps = {
         FFmpeg: ffmpegModule.FFmpeg,
@@ -214,6 +217,7 @@ async function loadDependencies() {
         transformersModule.env.backends.onnx.wasm.wasmPaths =
           'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/';
       }
+      console.info(`Video Copy Assistant ${APP_VERSION}: browser ASR engine loaded.`);
 
       return deps;
     }).catch((error) => {
