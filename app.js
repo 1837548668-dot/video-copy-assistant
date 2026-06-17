@@ -19,7 +19,7 @@ const state = {
   dependencyPromise: null
 };
 
-const APP_VERSION = '20260617-fix4';
+const APP_VERSION = '20260617-fix5';
 const TRANSFORMERS_URL =
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.js';
 
@@ -316,6 +316,10 @@ function toFriendlyError(error) {
 
   if (message.includes('fetch') || message.includes('Failed to fetch') || message.includes('NetworkError')) {
     return '处理失败：识别模型下载失败，请检查网络后刷新重试。';
+  }
+
+  if (message.includes('module specifier')) {
+    return '处理失败：浏览器识别依赖加载失败，请关闭旧页面后用最新链接重新打开。';
   }
 
   if (message.includes('memory') || message.includes('Array buffer allocation failed')) {
