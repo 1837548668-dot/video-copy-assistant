@@ -1,10 +1,3 @@
-import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm';
-import { fetchFile, toBlobURL } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm';
-import { env, pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/+esm';
-
-env.allowLocalModels = false;
-env.backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/';
-
 const els = {
   sourceUrl: document.querySelector('#sourceUrl'),
   ownershipConfirmed: document.querySelector('#ownershipConfirmed'),
@@ -22,8 +15,17 @@ const state = {
   ffmpeg: null,
   transcribers: new Map(),
   installPrompt: null,
-  sharedFile: null
+  sharedFile: null,
+  dependencyPromise: null
 };
+
+window.addEventListener('error', (event) => {
+  reportError(event.error || event.message || '页面脚本加载失败。');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  reportError(event.reason || '处理任务异常中断。');
+});
 
 window.addEventListener('beforeinstallprompt', (event) => {
   event.preventDefault();
@@ -54,19 +56,23 @@ if ('serviceWorker' in navigator) {
 loadSharedFile();
 
 async function processVideo() {
+  setStatus('已收到任务，正在检查文件...', 3);
+  showMessage('');
+
   if (!els.ownershipConfirmed.checked) {
     showMessage('请先确认该视频为自有或已授权内容。');
+    setStatus('等待确认授权。', 0);
     return;
   }
 
   const file = state.sharedFile || els.videoFile.files[0];
   if (!file) {
     showMessage('请选择视频或音频文件。');
+    setStatus('等待上传视频。', 0);
     return;
   }
 
   setBusy(true);
-  showMessage('');
 
   try {
     setStatus('准备音频...', 8);
@@ -119,6 +125,7 @@ async function decodeAudioFile(fileOrBlob) {
 
 async function extractWavWithFfmpeg(file) {
   const ffmpeg = await getFfmpeg();
+  const { fetchFile } = await loadDependencies();
   const inputName = `input-${Date.now()}.${extensionFor(file)}`;
   const outputName = 'audio.wav';
 
@@ -147,6 +154,7 @@ async function getFfmpeg() {
     return state.ffmpeg;
   }
 
+  const { FFmpeg, toBlobURL } = await loadDependencies();
   const ffmpeg = new FFmpeg();
   ffmpeg.on('progress', ({ progress }) => {
     const pct = Math.max(25, Math.min(42, Math.round(progress * 42)));
@@ -168,6 +176,7 @@ async function getTranscriber(modelName) {
     return state.transcribers.get(modelName);
   }
 
+  const { pipeline } = await loadDependencies();
   const transcriber = await pipeline('automatic-speech-recognition', modelName, {
     quantized: true,
     progress_callback: (progress) => {
@@ -180,6 +189,40 @@ async function getTranscriber(modelName) {
 
   state.transcribers.set(modelName, transcriber);
   return transcriber;
+}
+
+async function loadDependencies() {
+  if (!state.dependencyPromise) {
+    state.dependencyPromise = Promise.all([
+      import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm'),
+      import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm'),
+      import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/+esm')
+    ]).then(([ffmpegModule, utilModule, transformersModule]) => {
+      const deps = {
+        FFmpeg: ffmpegModule.FFmpeg,
+        fetchFile: utilModule.fetchFile,
+        toBlobURL: utilModule.toBlobURL,
+        pipeline: transformersModule.pipeline
+      };
+
+      if (!deps.FFmpeg || !deps.fetchFile || !deps.toBlobURL || !deps.pipeline) {
+        throw new Error('识别引擎加载不完整，请刷新后重试。');
+      }
+
+      transformersModule.env.allowLocalModels = false;
+      if (transformersModule.env.backends?.onnx?.wasm) {
+        transformersModule.env.backends.onnx.wasm.wasmPaths =
+          'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/';
+      }
+
+      return deps;
+    }).catch((error) => {
+      state.dependencyPromise = null;
+      throw new Error(`识别引擎加载失败：${error.message || String(error)}`);
+    });
+  }
+
+  return state.dependencyPromise;
 }
 
 function mixToMono(audioBuffer) {
@@ -244,6 +287,13 @@ async function loadSharedFile() {
 
 function showMessage(message) {
   els.transcript.value = message;
+}
+
+function reportError(error) {
+  const message = error?.message || String(error);
+  showMessage(`处理失败：${message}`);
+  setStatus('处理失败。', 0);
+  setBusy(false);
 }
 
 function setBusy(isBusy) {
