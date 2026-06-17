@@ -19,7 +19,7 @@ const state = {
   dependencyPromise: null
 };
 
-const APP_VERSION = '20260617-fix3';
+const APP_VERSION = '20260617-fix4';
 const TRANSFORMERS_URL =
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.js';
 
@@ -215,9 +215,11 @@ async function loadDependencies() {
       }
 
       transformersModule.env.allowLocalModels = false;
-      if (transformersModule.env.backends?.onnx?.wasm) {
-        transformersModule.env.backends.onnx.wasm.wasmPaths =
+      const wasmConfig = transformersModule.env.backends?.onnx?.wasm;
+      if (wasmConfig) {
+        wasmConfig.wasmPaths =
           'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/';
+        wasmConfig.numThreads = 1;
       }
       console.info(`Video Copy Assistant ${APP_VERSION}: browser ASR engine loaded.`);
 
