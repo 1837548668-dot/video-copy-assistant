@@ -19,7 +19,9 @@ const state = {
   dependencyPromise: null
 };
 
-const APP_VERSION = '20260617-fix2';
+const APP_VERSION = '20260617-fix3';
+const TRANSFORMERS_URL =
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.js';
 
 window.addEventListener('error', (event) => {
   reportError(event.error || event.message || '页面脚本加载失败。');
@@ -98,7 +100,7 @@ async function processVideo() {
     showMessage(text.trim() || '没有识别到文案。');
     setStatus('提取完成。', 100);
   } catch (error) {
-    showMessage(`处理失败：${error.message || String(error)}`);
+    showMessage(toFriendlyError(error));
     setStatus('处理失败。', 0);
   } finally {
     setBusy(false);
@@ -180,7 +182,7 @@ async function getTranscriber(modelName) {
 
   const { pipeline } = await loadDependencies();
   const transcriber = await pipeline('automatic-speech-recognition', modelName, {
-    quantized: true,
+    dtype: 'q8',
     progress_callback: (progress) => {
       if (progress.status === 'progress') {
         const pct = 45 + Math.round((progress.progress || 0) * 0.2);
@@ -199,7 +201,7 @@ async function loadDependencies() {
     state.dependencyPromise = Promise.all([
       import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm'),
       import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm'),
-      import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2')
+      import(TRANSFORMERS_URL)
     ]).then(([ffmpegModule, utilModule, transformersModule]) => {
       const deps = {
         FFmpeg: ffmpegModule.FFmpeg,
@@ -215,7 +217,7 @@ async function loadDependencies() {
       transformersModule.env.allowLocalModels = false;
       if (transformersModule.env.backends?.onnx?.wasm) {
         transformersModule.env.backends.onnx.wasm.wasmPaths =
-          'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/';
+          'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/';
       }
       console.info(`Video Copy Assistant ${APP_VERSION}: browser ASR engine loaded.`);
 
@@ -295,9 +297,30 @@ function showMessage(message) {
 
 function reportError(error) {
   const message = error?.message || String(error);
-  showMessage(`处理失败：${message}`);
+  showMessage(toFriendlyError(message));
   setStatus('处理失败。', 0);
   setBusy(false);
+}
+
+function toFriendlyError(error) {
+  const message = error?.message || String(error);
+
+  if (message.includes('registerBackend') || message.includes('backend')) {
+    return [
+      '处理失败：当前浏览器的本地 AI 识别引擎初始化失败。',
+      '请刷新后重试，或换 Chrome / Edge 浏览器打开；手机端建议先用 1 分钟以内短视频测试。'
+    ].join('\n');
+  }
+
+  if (message.includes('fetch') || message.includes('Failed to fetch') || message.includes('NetworkError')) {
+    return '处理失败：识别模型下载失败，请检查网络后刷新重试。';
+  }
+
+  if (message.includes('memory') || message.includes('Array buffer allocation failed')) {
+    return '处理失败：视频太大或设备内存不足，请先上传 1-5 分钟短视频测试。';
+  }
+
+  return `处理失败：${message}`;
 }
 
 function setBusy(isBusy) {
