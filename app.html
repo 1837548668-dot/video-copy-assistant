@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101828" />
     <title>在线提取文案｜授权视频文案助手</title>
-    <meta name="description" content="授权视频文案助手网页版上传入口。" />
+    <meta name="description" content="手机、平板、电脑都能用的视频文案本地提取工具。" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -22,15 +24,10 @@
         <div class="section-head">
           <p class="eyebrow">网页版 / PWA</p>
           <h1>上传视频，提取文案</h1>
-          <p class="lead">这个页面是手机、平板、电脑通用入口。上线时需要连接 HTTPS 后端。</p>
+          <p class="lead">视频在本机浏览器里处理，不需要安装电脑软件。安卓、iPhone、iPad、电脑都可以打开。</p>
         </div>
 
         <section class="panel webapp-panel">
-          <label class="field">
-            <span>后端地址</span>
-            <input id="apiBase" type="url" placeholder="https://你的后端域名" />
-          </label>
-
           <label class="field">
             <span>来源备注</span>
             <textarea id="sourceUrl" placeholder="视频来源、客户名称或备注"></textarea>
@@ -42,11 +39,29 @@
           </label>
 
           <label class="file-picker">
-            <span>视频文件</span>
+            <span>视频或音频文件</span>
             <input id="videoFile" type="file" accept="video/*,audio/*" />
           </label>
 
-          <button id="processBtn" class="primary-button button-reset" type="button">开始提取</button>
+          <label class="field">
+            <span>识别模型</span>
+            <select id="modelName">
+              <option value="Xenova/whisper-tiny" selected>快速模式：Whisper Tiny</option>
+              <option value="Xenova/whisper-base">更准模式：Whisper Base</option>
+            </select>
+          </label>
+
+          <div class="action-line">
+            <button id="processBtn" class="primary-button button-reset" type="button">开始提取</button>
+            <button id="installBtn" class="secondary-button button-reset" type="button" hidden>安装到桌面</button>
+          </div>
+
+          <div class="progress-area">
+            <div class="progress-bar">
+              <span id="progressFill"></span>
+            </div>
+            <p id="statusText">等待上传视频。</p>
+          </div>
 
           <div class="result-box">
             <div class="section-head compact-head">
@@ -59,14 +74,14 @@
 
         <section class="content-band split inline-band" id="notice">
           <div>
-            <p class="eyebrow">上线条件</p>
-            <h2>需要一个云端后端</h2>
+            <p class="eyebrow">使用说明</p>
+            <h2>适合短视频和常见格式</h2>
           </div>
-          <p>手机和网页不能直接运行本地 FFmpeg 服务。要让客户长期使用，需要部署 HTTPS 后端，并配置转写密钥、上传限制、存储清理和用户授权记录。</p>
+          <p>首次使用会下载浏览器转写模型，手机端建议先处理 1-5 分钟短视频。常见 mp4、mov、webm、m4a、mp3、wav 都会尝试解析。微信视频号如果只转发卡片，网页拿不到原视频文件；请保存/转发视频文件后再上传。</p>
         </section>
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>
