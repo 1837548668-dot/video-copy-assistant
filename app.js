@@ -19,7 +19,7 @@ const state = {
   dependencyPromise: null
 };
 
-const APP_VERSION = '20260617-fix5';
+const APP_VERSION = '20260617-fix6';
 const TRANSFORMERS_URL =
   'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.js';
 
@@ -182,7 +182,8 @@ async function getTranscriber(modelName) {
 
   const { pipeline } = await loadDependencies();
   const transcriber = await pipeline('automatic-speech-recognition', modelName, {
-    dtype: 'q8',
+    device: 'wasm',
+    dtype: 'fp32',
     progress_callback: (progress) => {
       if (progress.status === 'progress') {
         const pct = 45 + Math.round((progress.progress || 0) * 0.2);
@@ -324,6 +325,14 @@ function toFriendlyError(error) {
 
   if (message.includes('memory') || message.includes('Array buffer allocation failed')) {
     return '处理失败：视频太大或设备内存不足，请先上传 1-5 分钟短视频测试。';
+  }
+
+  if (
+    message.includes('Missing required scale') ||
+    message.includes('DequantizeLinear') ||
+    message.includes("Can't create a session")
+  ) {
+    return '处理失败：浏览器无法启动量化识别模型。请关闭旧页面，用最新版链接重新打开后再试。';
   }
 
   return `处理失败：${message}`;
